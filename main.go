@@ -1,17 +1,13 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
+	"github.com/shariq/golang-dev-logic-challenge-shariqcheema/routes"
 )
 
 func main() {
-	http.HandleFunc("/analyze", analyzeHandler)
+	router := routes.SetupRouter()
 
 	fmt.Println("Starting server on port 8080")
-	http.ListenAndServe(":8080", nil)
-}
-
-func analyzeHandler(w http.ResponseWriter, r *http.Request) {
-	// Your code here
+	router.Run(":8080")
 }

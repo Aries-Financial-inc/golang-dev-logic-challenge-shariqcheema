@@ -2,43 +2,43 @@ package routes
 
 import (
 	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"github.com/shariq/golang-dev-logic-challenge-shariqcheema/controllers"
+	"github.com/shariq/golang-dev-logic-challenge-shariqcheema/model"
 )
 
-// OptionsContract structure for the request body
-type OptionsContract struct {
-	// Your code here
-}
-
-// AnalysisResult structure for the response body
 type AnalysisResult struct {
-	GraphData       []GraphPoint `json:"graph_data"`
-	MaxProfit       float64      `json:"max_profit"`
-	MaxLoss         float64      `json:"max_loss"`
-	BreakEvenPoints []float64    `json:"break_even_points"`
-}
-
-// GraphPoint structure for X & Y values of the risk & reward graph
-type GraphPoint struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
+	GraphData       []controllers.XYValue `json:"graph_data"`
+	MaxProfit       float64                `json:"max_profit"`
+	MaxLoss         float64                `json:"max_loss"`
+	BreakEvenPoints []float64              `json:"break_even_points"`
 }
 
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 
 	router.POST("/analyze", func(c *gin.Context) {
-		var contracts []OptionsContract
+		var contracts []model.OptionsContract
 
 		if err := c.ShouldBindJSON(&contracts); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 			return
 		}
 
-		// Your code here
+		for _, contract := range contracts {
+			if contract.Type != "Call" && contract.Type != "Put" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid option type"})
+				return
+			}
+			if contract.LongShort != "long" && contract.LongShort != "short" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid position type"})
+				return
+			}
+		}
 
-		c.JSON(http.StatusOK, gin.H{"message": "Your code here"})
+		analysisResult := controllers.AnalyzeOptionsContracts(contracts)
+
+		c.JSON(http.StatusOK, analysisResult)
 	})
 
 	return router
